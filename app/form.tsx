@@ -40,14 +40,12 @@ export default function Form() {
   const [fetching, setFetching] = React.useState(false);
 
   React.useEffect(() => {
-    if (useApi === false) {
-      if (actionResult.message === "invalid") {
-        setIsInvalid(true);
-      } else {
-        setIsInvalid(false);
-      }
+    if (actionResult.message === "invalid") {
+      setIsInvalid(true);
+    } else {
+      setIsInvalid(false);
     }
-  }, [actionResult, useApi]);
+  }, [actionResult]);
 
   // values derived from other state
   let { color, errorMessage } = React.useMemo<{
@@ -58,7 +56,7 @@ export default function Form() {
       if (isInvalid) {
         return {
           color: "danger",
-          errorMessage: "please try again",
+          errorMessage: "hmmm... that doesn't look right",
           isInvalid: true,
         };
       } else if (isInvalid === false) {
@@ -69,6 +67,7 @@ export default function Form() {
         };
       }
     }
+
     // default returned when there is no input
     return {
       color: "default",
@@ -112,7 +111,10 @@ export default function Form() {
         </label>
         <Switch
           isSelected={useApi}
-          onValueChange={(mode) => setUseApi(mode)}
+          onValueChange={(mode) => {
+            setIsInvalid(null);
+            setUseApi(mode);
+          }}
           size="sm"
         />
         <label aria-label="POST /api" className="mr-2">
@@ -125,7 +127,11 @@ export default function Form() {
             <Input
               color={color}
               description={
-                fetching ? "validating..." : "enter a valid card number"
+                color === "success"
+                  ? "looks good!"
+                  : fetching
+                    ? "validating..."
+                    : "spaces between numbers"
               }
               errorMessage={errorMessage}
               isClearable
