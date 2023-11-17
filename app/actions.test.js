@@ -1,6 +1,10 @@
 import "@testing-library/jest-dom";
 import { luhnCheckCardNumber } from "./actions";
 
+/**
+ * Normally we should test the whole view, instead of the fn in isolation,
+ * however that requires some setup that is beyond the scope of this exercise
+ */
 describe("Luhn credit card validator", () => {
   it("returns null when no value is passed in", async () => {
     const formData = new FormData();
@@ -26,7 +30,6 @@ describe("Luhn credit card validator", () => {
         const formData = new FormData();
         formData.append("credit-card", cc);
         const result = await luhnCheckCardNumber({ message: null }, formData);
-        console.log(formData.get("credit-card"), result);
         expect(result.message).toEqual("invalid");
       },
     );

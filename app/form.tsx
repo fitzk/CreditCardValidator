@@ -6,34 +6,38 @@ import { luhnCheckCardNumber } from "./actions";
 import type { Result } from "./types";
 
 function SubmitButton() {
+  // Used if we use server actions to validate data
   const res = useFormStatus();
-
   return (
-    <>
-      <Button
-        color="primary"
-        disabled={res.pending}
-        size="md"
-        type="submit"
-        variant="bordered"
-      >
-        validate
-      </Button>
-    </>
+    <Button
+      color="primary"
+      disabled={res.pending}
+      size="md"
+      type="submit"
+      variant="bordered"
+    >
+      validate
+    </Button>
   );
 }
 
 const initState: Result = {
   message: null,
 };
-
+/**
+ * Data is validated on the server.
+ * This form uses either a server action or POST request to validate the card number server side.
+ * You can toggle this in the UI. I built this form using server actions to run validation
+ * at first, but the req specifies that we should use an API endpoint so I added the option
+ * to run validation via a POST request to /api too.
+ */
 export default function Form() {
-  // if we use route actions to grab data
+  // Used if we use server actions to validate data
   const [actionResult, action] = useFormState(luhnCheckCardNumber, initState);
   const [isInvalid, setIsInvalid] = React.useState<null | boolean>(false);
   const [useApi, setUseApi] = React.useState(true);
   const [value, setValue] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
+  const [fetching, setFetching] = React.useState(false);
 
   React.useEffect(() => {
     if (useApi === false) {
@@ -45,11 +49,12 @@ export default function Form() {
     }
   }, [actionResult, useApi]);
 
+  // values derived from other state
   let { color, errorMessage } = React.useMemo<{
     color: "danger" | "default" | "success";
     errorMessage: string;
   }>(() => {
-    if (value.length) {
+    if (value) {
       if (isInvalid) {
         return {
           color: "danger",
@@ -64,7 +69,7 @@ export default function Form() {
         };
       }
     }
-
+    // default returned when there is no input
     return {
       color: "default",
       errorMessage: "",
@@ -75,7 +80,7 @@ export default function Form() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     try {
-      setLoading(true);
+      setFetching(true);
       let res = await fetch("/api", {
         body: JSON.stringify({ "credit-card": value }),
         headers: {
@@ -89,32 +94,30 @@ export default function Form() {
       } else if (result.message === "valid") {
         setIsInvalid(false);
       }
-      setLoading(false);
+      setFetching(false);
     } catch (error) {
       setIsInvalid(true);
     }
   }
 
   function dataProps() {
-    if (useApi) {
-      return { onSubmit };
-    } else {
-      return { action };
-    }
+    return useApi ? { onSubmit } : { action };
   }
 
   return (
     <>
       <div className="flex align-center">
-        <label className="mr-2">server action</label>
+        <label aria-label="server action" className="mr-2">
+          server action
+        </label>
         <Switch
           isSelected={useApi}
-          onValueChange={(mode) => {
-            setUseApi(mode);
-          }}
+          onValueChange={(mode) => setUseApi(mode)}
           size="sm"
         />
-        <label className="mr-2">POST /api</label>
+        <label aria-label="POST /api" className="mr-2">
+          POST /api
+        </label>
       </div>
       <Card className="bg-content1 shadow-xl p-6 text-sm" radius="md">
         <CardBody>
@@ -122,7 +125,7 @@ export default function Form() {
             <Input
               color={color}
               description={
-                loading ? "validating..." : "enter a valid card number"
+                fetching ? "validating..." : "enter a valid card number"
               }
               errorMessage={errorMessage}
               isClearable
