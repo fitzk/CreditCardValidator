@@ -131,7 +131,7 @@ export default function Form() {
                   ? "looks good!"
                   : fetching
                     ? "validating..."
-                    : "card number with or without spaces"
+                    : "spaces in card numbers are okay"
               }
               errorMessage={errorMessage}
               isClearable
