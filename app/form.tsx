@@ -1,13 +1,6 @@
 "use client";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Input,
-  Switch,
-} from "@nextui-org/react";
-import React, { ChangeEvent, EventHandler } from "react";
+import { Button, Card, CardBody, Input, Switch } from "@nextui-org/react";
+import React, { FormEvent } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { luhnCheckCardNumber } from "./actions";
 import type { Result } from "./types";
@@ -43,12 +36,14 @@ export default function Form() {
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
-    if (actionResult.message === "invalid") {
-      setIsInvalid(true);
-    } else {
-      setIsInvalid(false);
+    if (useApi === false) {
+      if (actionResult.message === "invalid") {
+        setIsInvalid(true);
+      } else {
+        setIsInvalid(false);
+      }
     }
-  }, [actionResult]);
+  }, [actionResult, useApi]);
 
   let { color, errorMessage } = React.useMemo<{
     color: "danger" | "default" | "success";
@@ -77,7 +72,7 @@ export default function Form() {
     };
   }, [isInvalid, value]);
 
-  async function handleSubmit(e) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     try {
       setLoading(true);
@@ -102,7 +97,7 @@ export default function Form() {
 
   function dataProps() {
     if (useApi) {
-      return { onSubmit: handleSubmit };
+      return { onSubmit };
     } else {
       return { action };
     }
@@ -113,11 +108,11 @@ export default function Form() {
       <div className="flex align-center">
         <label className="mr-2">server action</label>
         <Switch
-        isSelected={useApi}
+          isSelected={useApi}
           onValueChange={(mode) => {
             setUseApi(mode);
           }}
-          size='sm'
+          size="sm"
         />
         <label className="mr-2">POST /api</label>
       </div>

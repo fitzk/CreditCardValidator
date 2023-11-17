@@ -21,12 +21,14 @@ describe("Luhn credit card validator", () => {
   });
 
   it("rejects invalid card numbers", () => {
-    ["4321233433334444", "333", "aaa", '22222bbb  d', '    '].forEach(async (cc) => {
-      const formData = new FormData();
-      formData.append("credit-card", cc);
-      const result = await luhnCheckCardNumber({ message: null }, formData);
-      console.log(formData.get('credit-card'), result)
-      expect(result.message).toEqual("invalid");
-    });
+    ["4321233433334444", "333", "aaa", "22222bbb  d", "    "].forEach(
+      async (cc) => {
+        const formData = new FormData();
+        formData.append("credit-card", cc);
+        const result = await luhnCheckCardNumber({ message: null }, formData);
+        console.log(formData.get("credit-card"), result);
+        expect(result.message).toEqual("invalid");
+      },
+    );
   });
 });
